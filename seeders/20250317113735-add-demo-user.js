@@ -26,6 +26,7 @@ module.exports = {
       full_name : `first admin`,
       user_name : `first_admin`,
       password : await genhashPass('admin@1234'),
+      remember_me : true,
       createdAt : new Date,
       updatedAt : new Date
     },{
@@ -35,6 +36,7 @@ module.exports = {
       full_name : `second admin`,
       user_name : `second_admin`,
       password : await genhashPass('secondadmin@1234'),
+      remember_me : true,
       createdAt : new Date,
       updatedAt : new Date
     },{
@@ -44,6 +46,7 @@ module.exports = {
       full_name : `first user`,
       user_name : `first_user`,
       password : await genhashPass('user@1234'),
+      remember_me : true,
       createdAt : new Date,
       updatedAt : new Date
     },{
@@ -53,6 +56,7 @@ module.exports = {
       full_name : `second user`,
       user_name : `second_user`,
       password : await genhashPass('seconduser@1234'),
+      remember_me : true,
       createdAt : new Date,
       updatedAt : new Date
     }],{})

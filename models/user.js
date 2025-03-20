@@ -54,6 +54,11 @@ module.exports = (sequelize, DataTypes) => {
       type : DataTypes.BOOLEAN,
       allowNull : false,
       defaultValue : true
+    },
+    remember_me : {
+      type : DataTypes.BOOLEAN,
+      allowNull : false,
+      defaultValue : false
     }
   }, {
     sequelize,

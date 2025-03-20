@@ -32,20 +32,36 @@ module.exports = {
                 user_name : userName
             })
             console.log(UserRes)
-            let accessToken = jwt.sign({id : UserRes.dataValues.id, email : UserRes.dataValues.email},JWT_SECRET_KEY,{expiresIn : "1h"})
-            console.log(accessToken)
-            let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
-            // console.log(encryptedToken)
             if(rememberMe)
             {
-                console.log('refresh token : ')
-                let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email},JWT_SECRET_KEY,{expiresIn : "24h"})
-                // console.log(refreshToken)
+                let accessToken = jwt.sign({id : UserRes.dataValues.id, email : UserRes.dataValues.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "1h"})
+                console.log(accessToken)
+                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                console.log(encryptedToken)
+
+                console.log('implementing remember me refresh token : ')
+                let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "30d"})
+                console.log(refreshToken)
                 let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
-                // console.log(encryptedRefreshToken)
-                res.cookie('refreshToken',encryptedRefreshToken,{maxAge : 24*60*60*1000})
+                console.log(encryptedRefreshToken)
+                return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
-            return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',token : encryptedToken})
+            else
+            {
+                let accessToken = jwt.sign({id : UserRes.dataValues.id, email : UserRes.dataValues.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "1h"})
+                console.log(accessToken)
+                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                console.log(encryptedToken)
+
+                console.log('implementing refresh token when remember me is false : ')
+                let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "7d"})
+                console.log(refreshToken)
+                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                console.log(encryptedRefreshToken)
+                return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
+            }
+            
+            
         } catch (err) {
             return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message : 'internal server error',error : err})
         }
@@ -64,22 +80,36 @@ module.exports = {
             }
             console.log(req.reqUser.id)
             console.log(req.reqUser.email)
-            let accessToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email},JWT_SECRET_KEY,{expiresIn : "1h"})
-            // console.log(accessToken)
-            let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
-            // console.log(encryptedToken)
-
             if(rememberMe)
             {
-                console.log('refresh token : ')
-                let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email},JWT_SECRET_KEY,{expiresIn : "24h"})
-                // console.log(refreshToken)
+                let accessToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "1h"})
+                console.log(accessToken)
+                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                console.log(encryptedToken)
+
+                console.log('implementing remember me refresh token : ')
+                let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "30d"})
+                console.log(refreshToken)
                 let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
-                // console.log(encryptedRefreshToken)
-                res.cookie('refreshToken',encryptedRefreshToken,{maxAge : 24*60*60*1000})
+                console.log(encryptedRefreshToken)
+                return res.status(HTTP_STATUS_CODES.OK).json({message : 'Login Successfull',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
-            // console.log(encryptedToken)
-            return res.status(HTTP_STATUS_CODES.OK).json({message : 'LOGIN SUCCESSFULL',accessToken : encryptedToken})
+            else
+            {
+                let accessToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "1h"})
+                console.log(accessToken)
+                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                console.log(encryptedToken)
+
+                console.log('implementing refresh token when remember me is false : ')
+                let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "7d"})
+                console.log(refreshToken)
+                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                console.log(encryptedRefreshToken)
+                return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
+            }
+            
+           
         } catch (err) {
             return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message : 'internal server error',error : err})
         }
@@ -89,10 +119,27 @@ module.exports = {
         {
             console.log('inside refresh access token')
             console.log(req.user)
-            const accessToken = jwt.sign({id : req.user.id,email : req.user.email},JWT_SECRET_KEY,{expiresIn : '1h'})
-            let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
-            // console.log(encryptedToken)
-            return res.status(HTTP_STATUS_CODES.OK).json({message : 'new access token generated',token : encryptedToken})
+            if(req.user.rememberMe)
+            {
+                console.log('remember me is true')
+                let accessToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : '1h'})
+                let refreshToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "30d"})
+                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                // console.log(encryptedToken)
+                return res.status(HTTP_STATUS_CODES.OK).json({message : 'new access token generated',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
+            }
+            else
+            {
+                console.log('remember me is false')
+                let accessToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : '1h'})
+                let refreshToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "7d"})
+                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                // console.log(encryptedToken)
+                return res.status(HTTP_STATUS_CODES.OK).json({message : 'new access token generated',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
+            }
+            
         }catch(err)
         {
             return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message : 'internal server error in refresh access token function',error : err})
