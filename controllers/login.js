@@ -3,6 +3,7 @@ const {User} = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const cryptoJs = require('crypto-js')
+const {encryptToken} = require('../utils/helper.js')
 module.exports = {
     registerUser : async(req,res) => {
         try {
@@ -36,13 +37,13 @@ module.exports = {
             {
                 let accessToken = jwt.sign({id : UserRes.dataValues.id, email : UserRes.dataValues.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "1h"})
                 console.log(accessToken)
-                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                let encryptedToken = encryptToken(accessToken)
                 console.log(encryptedToken)
 
                 console.log('implementing remember me refresh token : ')
                 let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "30d"})
                 console.log(refreshToken)
-                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                let encryptedRefreshToken = encryptToken(accessToken)
                 console.log(encryptedRefreshToken)
                 return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
@@ -50,13 +51,13 @@ module.exports = {
             {
                 let accessToken = jwt.sign({id : UserRes.dataValues.id, email : UserRes.dataValues.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "1h"})
                 console.log(accessToken)
-                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                let encryptedToken = encryptToken(accessToken)
                 console.log(encryptedToken)
 
                 console.log('implementing refresh token when remember me is false : ')
                 let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "7d"})
                 console.log(refreshToken)
-                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                let encryptedRefreshToken = encryptToken(accessToken)
                 console.log(encryptedRefreshToken)
                 return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
@@ -84,13 +85,13 @@ module.exports = {
             {
                 let accessToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "1h"})
                 console.log(accessToken)
-                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                let encryptedToken = encryptToken(accessToken)
                 console.log(encryptedToken)
 
                 console.log('implementing remember me refresh token : ')
                 let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "30d"})
                 console.log(refreshToken)
-                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                let encryptedRefreshToken = encryptToken(accessToken)
                 console.log(encryptedRefreshToken)
                 return res.status(HTTP_STATUS_CODES.OK).json({message : 'Login Successfull',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
@@ -98,13 +99,13 @@ module.exports = {
             {
                 let accessToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "1h"})
                 console.log(accessToken)
-                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
+                let encryptedToken = encryptToken(accessToken)
                 console.log(encryptedToken)
 
                 console.log('implementing refresh token when remember me is false : ')
                 let refreshToken = jwt.sign({id : req.reqUser.id, email : req.reqUser.email,rememberMe : false},JWT_SECRET_KEY,{expiresIn : "7d"})
                 console.log(refreshToken)
-                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                let encryptedRefreshToken = encryptToken(accessToken)
                 console.log(encryptedRefreshToken)
                 return res.status(HTTP_STATUS_CODES.OK).json({message : 'User Created',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
@@ -124,8 +125,8 @@ module.exports = {
                 console.log('remember me is true')
                 let accessToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : '1h'})
                 let refreshToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "30d"})
-                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
-                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                let encryptedToken = encryptToken(accessToken)
+                let encryptedRefreshToken = encryptToken(accessToken)
                 // console.log(encryptedToken)
                 return res.status(HTTP_STATUS_CODES.OK).json({message : 'new access token generated',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
@@ -134,8 +135,8 @@ module.exports = {
                 console.log('remember me is false')
                 let accessToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : '1h'})
                 let refreshToken = jwt.sign({id : req.user.id,email : req.user.email,rememberMe : true},JWT_SECRET_KEY,{expiresIn : "7d"})
-                let encryptedToken = cryptoJs.AES.encrypt(accessToken,AES_SECRET_KEY).toString()
-                let encryptedRefreshToken = cryptoJs.AES.encrypt(refreshToken,AES_SECRET_KEY).toString()
+                let encryptedToken = encryptToken(accessToken)
+                let encryptedRefreshToken = encryptToken(refreshToken)
                 // console.log(encryptedToken)
                 return res.status(HTTP_STATUS_CODES.OK).json({message : 'new access token generated',accessToken : encryptedToken,refreshToken : encryptedRefreshToken})
             }
@@ -145,5 +146,20 @@ module.exports = {
             return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message : 'internal server error in refresh access token function',error : err})
         }
         
+    },
+    getDetails : async(req,res) => {
+        try {
+            let id = req.user.id
+            let userRes = await User.findOne({where : {id} ,
+                attributes : {exclude : ['password','updated_at','created_at']}
+            })
+            if(!userRes)
+            {
+                return res.status(HTTP_STATUS_CODES.NOT_FOUND).json({message : 'user corresponding to the acces token is not found'})
+            }
+            return res.status(HTTP_STATUS_CODES.OK).json({data : userRes})
+        } catch (error) {
+            
+        }
     }
 }

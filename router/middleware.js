@@ -1,24 +1,24 @@
 const cryptoJS = require('crypto-js')
-const {AES_SECRET_KEY,HTTP_STATUS_CODES,JWT_SECRET_KEY} = require('../utils/constant')
+const {HTTP_STATUS_CODES,JWT_SECRET_KEY} = require('../utils/constant')
 const jwt = require('jsonwebtoken')
-const validateRefreshToken = (req,res,next) => {
+const {decryptToken} = require('../utils/helper')
+
+const checkJwtToken = (req,res,next) => {
     console.log(req.headers)
-    let refreshToken = req.headers['authorization'].split(' ')[1]
-    console.log(refreshToken)
-    if(!refreshToken)
+    let token = req.headers['authorization'].split(' ')[1]
+    console.log(token)
+    if(!token)
     {
-        return res.status(HTTP_STATUS_CODES.UNPROCESSABLE_CONTENT).json({message : 'refresh token not provided'})
-    }
-    // console.log(refreshToken)
-    let jwtRefreshToken = cryptoJS.AES.decrypt(refreshToken,AES_SECRET_KEY).toString(cryptoJS.enc.Utf8)
-    // console.log('nc')
-    // console.log(jwtRefreshToken)
-    if(!jwtRefreshToken)
-    {
-        return res.status(HTTP_STATUS_CODES.UNPROCESSABLE_CONTENT).json({message : 'refresh token not decoded properly'})
+        return res.status(HTTP_STATUS_CODES.UNAUTHORISED).json({message : 'token not provided'})
     }
     
-    jwt.verify(jwtRefreshToken,JWT_SECRET_KEY,(err,user) => {
+    let jwtToken = decryptToken(token)
+    if(!jwtToken)
+    {
+        return res.status(HTTP_STATUS_CODES.UNAUTHORISED).json({message : 'refresh token not decoded properly'})
+    }
+    
+    jwt.verify(jwtToken,JWT_SECRET_KEY,(err,user) => {
         if(err)
         {
             return res.status(HTTP_STATUS_CODES.FORBIDDEN).json({message : `refresh token has expired`})
@@ -28,4 +28,6 @@ const validateRefreshToken = (req,res,next) => {
     })
 }
 
-module.exports = validateRefreshToken
+module.exports = {
+    checkJwtToken
+}
